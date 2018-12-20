@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "TankAimingComponent.h"
+#include "TankBarrel.h"
 
 // Sets default values for this component's properties
 UTankAimingComponent::UTankAimingComponent()
@@ -18,7 +19,7 @@ void UTankAimingComponent::AimAt(const FVector& WorldLocation, float FiringSpeed
     }
     
     FVector OutFiringVelocity;
-    bHaveAimSolution = UGameplayStatics::SuggestProjectileVelocity(this,
+    bool bHaveAimSolution = UGameplayStatics::SuggestProjectileVelocity(this,
                                                                    OutFiringVelocity,
                                                                    Barrel->GetSocketLocation(FName("Projectile")),
                                                                    WorldLocation,
@@ -26,11 +27,15 @@ void UTankAimingComponent::AimAt(const FVector& WorldLocation, float FiringSpeed
                                                                    ESuggestProjVelocityTraceOption::DoNotTrace);
     if (bHaveAimSolution) {
         FVector AimDirection = OutFiringVelocity.GetSafeNormal();
-        MoveBarrelTowards();
+        MoveBarrelTowards(AimDirection);
+        UE_LOG(LogTemp, Warning, TEXT("%f: Solution found"), GetWorld()->GetTimeSeconds())
+    }
+    else {
+        UE_LOG(LogTemp, Warning, TEXT("%f: Solution was not found"), GetWorld()->GetTimeSeconds())
     }
 }
 
-void UTankAimingComponent::SetBarrel(UStaticMeshComponent* BarrelToSet) {
+void UTankAimingComponent::SetBarrel(UTankBarrel* BarrelToSet) {
     Barrel = BarrelToSet;
 }
 
@@ -38,5 +43,5 @@ void UTankAimingComponent::MoveBarrelTowards(const FVector& AimDirection) {
     FRotator BarrelRotator = Barrel->GetForwardVector().Rotation();
     FRotator AimRotator = AimDirection.Rotation();
     FRotator DeltaRotator = AimRotator - BarrelRotator;
-    
+    Barrel->Elevate(5.f);
 }
