@@ -3,11 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Kismet/GameplayStatics.h"
 #include "Components/ActorComponent.h"
 #include "TankAimingComponent.generated.h"
 
 class UTankBarrel;
+class UTankTurret;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BATTLETANK_API UTankAimingComponent : public UActorComponent
@@ -20,9 +20,12 @@ public:
 
     void AimAt(const FVector& WorldLocation, float FiringSpeed);
     void SetBarrel(UTankBarrel* BarrelToSet);
+    void SetTurret(UTankTurret* TurretToSet);
     
 private:
     UTankBarrel* Barrel;
+    UTankTurret* Turret;
     
     void MoveBarrelTowards(const FVector& AimDirection);
+    float GetMinDegreesMovement(const float& Degrees) const;
 };

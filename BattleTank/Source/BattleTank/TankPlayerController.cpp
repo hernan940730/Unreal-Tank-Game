@@ -1,13 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "TankPlayerController.h"
+#include "Tank.h"
 
 void ATankPlayerController::BeginPlay() {
     Super::BeginPlay();
     ATank* ControlledTank = GetControlledTank();
-    if (ControlledTank) {
-        UE_LOG(LogTemp, Warning, TEXT("My Controlled Tank is %s"), *(ControlledTank->GetName()))
-    }
 }
 
 void ATankPlayerController::Tick(float DeltaTime) {

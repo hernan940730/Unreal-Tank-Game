@@ -15,7 +15,6 @@ ATank::ATank()
 void ATank::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called to bind functionality to input
@@ -29,6 +28,14 @@ void ATank::AimAt(const FVector& Location) {
     TankAimingComponent->AimAt(Location, FiringSpeed);
 }
 
+void ATank::Fire() {
+    UE_LOG(LogTemp, Warning, TEXT("Tank is firing"))
+}
+
 void ATank::SetBarrelReference(UTankBarrel* BarrelToSet) {
     TankAimingComponent->SetBarrel(BarrelToSet);
+}
+
+void ATank::SetTurretReference(UTankTurret* TurretToSet) {
+    TankAimingComponent->SetTurret(TurretToSet);
 }
