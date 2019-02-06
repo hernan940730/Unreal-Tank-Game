@@ -31,15 +31,18 @@ void ATank::AimAt(const FVector& Location) {
 }
 
 void ATank::Fire() {
-    UE_LOG(LogTemp, Warning, TEXT("Tank is firing"))
     UClass* ProjectileClass = Projectile.Get();
-    if (!Barrel || !ProjectileClass) {
+    bool isReloaded = (FPlatformTime::Seconds() - LastFiringTimeInSeconds) > TimeToReloadInSeconds;
+    if (!Barrel || !ProjectileClass || !isReloaded) {
         return;
     }
-    GetWorld()->SpawnActor<AProjectile>(ProjectileClass,
+    AProjectile* Projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileClass,
                                         Barrel->GetSocketLocation(FName("Projectile")),
                                         Barrel->GetSocketRotation(FName("Projectile")),
                                         FActorSpawnParameters());
+    
+    LastFiringTimeInSeconds = FPlatformTime::Seconds();
+    Projectile->LaunchProjectile(FiringSpeed);
 }
 
 void ATank::SetBarrelReference(UTankBarrel* BarrelToSet) {

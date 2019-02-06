@@ -5,13 +5,12 @@
 
 void ATankAIController::BeginPlay() {
     Super::BeginPlay();
-    ATank* ControlledTank = GetControlledTank();
-    ATank* PlayerTank = GetPlayerTank();
 }
 
 void ATankAIController::Tick(float DeltaTime) {
     Super::Tick(DeltaTime);
     AimTowardsPlayer();
+    GetControlledTank()->Fire();
 }
 
 ATank* ATankAIController::GetControlledTank() const {
