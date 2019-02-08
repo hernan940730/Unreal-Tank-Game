@@ -22,7 +22,8 @@ protected:
 private:
     ATank* GetControlledTank() const;
     ATank* GetPlayerTank() const;
-    void AimTowardsPlayer();
+    
+    float AcceptanceRadius = 3000;
     
 public:
     void Tick(float DeltaTime) override;

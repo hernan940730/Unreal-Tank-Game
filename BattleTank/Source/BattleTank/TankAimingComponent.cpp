@@ -36,9 +36,6 @@ void UTankAimingComponent::AimAt(const FVector& WorldLocation, float FiringSpeed
         FVector AimDirection = OutFiringVelocity.GetSafeNormal();
         MoveBarrelTowards(AimDirection);
     }
-    else {
-        UE_LOG(LogTemp, Error, TEXT("%f: Solution was not found"), GetWorld()->GetTimeSeconds())
-    }
 }
 
 void UTankAimingComponent::SetBarrel(UTankBarrel* BarrelToSet) {
