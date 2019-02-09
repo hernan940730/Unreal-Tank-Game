@@ -1,11 +1,15 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "TankPlayerController.h"
-#include "Tank.h"
+#include "TankAimingComponent.h"
 
 void ATankPlayerController::BeginPlay() {
     Super::BeginPlay();
-    ATank* ControlledTank = GetControlledTank();
+    auto AimingComponent = GetPawn()->FindComponentByClass<UTankAimingComponent>();
+    if (!ensure(AimingComponent)) {
+        return;
+    }
+    FoundAimingComponent(AimingComponent);
 }
 
 void ATankPlayerController::Tick(float DeltaTime) {
@@ -13,27 +17,24 @@ void ATankPlayerController::Tick(float DeltaTime) {
     AimTowardsCrosshair();
 }
 
-ATank* ATankPlayerController::GetControlledTank() const {
-    return Cast<ATank>(GetPawn());
-}
-
 void ATankPlayerController::AimTowardsCrosshair() {
-    ATank* ControlledTank = GetControlledTank();
-    if (!ControlledTank) {
-        return;
-    }
     FVector HitLocation;
-    bool HasHit = GetSightRayHitLocation(HitLocation);
+    GetSightRayHitLocation(HitLocation);
 }
 
 
 bool ATankPlayerController::GetSightRayHitLocation(FVector& OutHitLocation) const {
+    auto AimingComponent = GetPawn()->FindComponentByClass<UTankAimingComponent>();
+    if (!ensure(AimingComponent)) {
+        return false;
+    }
+    
     FVector2D CrosshairScreenPosition = GetCrosshairScreenPosition();
     FVector WorldLocation;
     FVector WorldDirection;
     if (DeprojectScreenPositionToWorld(CrosshairScreenPosition.X, CrosshairScreenPosition.Y, WorldLocation, WorldDirection)) {
         GetLookVectorHitLocation(OutHitLocation, WorldDirection);
-        GetControlledTank()->AimAt(OutHitLocation);
+        AimingComponent->AimAt(OutHitLocation);
         return true;
     }
     return false;
@@ -54,7 +55,7 @@ bool ATankPlayerController::GetLookVectorHitLocation(FVector& OutHitLocation, co
                                          StartLocation,
                                          EndLocation,
                                          ECC_Visibility,
-                                         FCollisionQueryParams(FName(NAME_None), false, GetControlledTank()),
+                                         FCollisionQueryParams(FName(NAME_None), false, GetPawn()),
                                          FCollisionResponseParams(ECR_Block))) {
         OutHitLocation = OutHitResult.Location;
         return true;

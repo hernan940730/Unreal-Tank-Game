@@ -6,8 +6,6 @@
 #include "AIController.h"
 #include "TankAIController.generated.h"
 
-class ATank;
-
 /**
  * 
  */
@@ -20,10 +18,9 @@ protected:
     void BeginPlay() override;
     
 private:
-    ATank* GetControlledTank() const;
-    ATank* GetPlayerTank() const;
+    APawn* GetPlayerTank() const;
     
-    float AcceptanceRadius = 3000;
+    float AcceptanceRadius = 30000;
     
 public:
     void Tick(float DeltaTime) override;
