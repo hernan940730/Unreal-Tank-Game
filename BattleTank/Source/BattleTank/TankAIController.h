@@ -20,7 +20,8 @@ protected:
 private:
     APawn* GetPlayerTank() const;
     
-    float AcceptanceRadius = 30000;
+    UPROPERTY(EditAnywhere, Category = Setup)
+    float AcceptanceRadius = 8000;
     
 public:
     void Tick(float DeltaTime) override;

@@ -2,6 +2,7 @@
 
 #include "TankAimingComponent.h"
 #include "Kismet/GameplayStatics.h"
+//#include "GenericPlatform/GenericPlatformMath.h"
 #include "TankBarrel.h"
 #include "TankTurret.h"
 #include "Projectile.h"
@@ -11,7 +12,17 @@ UTankAimingComponent::UTankAimingComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
+    AimDirection = FVector(0, 0, 0);
+}
+
+void UTankAimingComponent::BeginPlay() {
+    LastFiringTimeInSeconds = FPlatformTime::Seconds();
+}
+
+void UTankAimingComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
+    Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+    SetFiringState();
 }
 
 void UTankAimingComponent::Initialize(UTankTurret* TurretToSet, UTankBarrel* BarrelToSet) {
@@ -41,12 +52,11 @@ void UTankAimingComponent::AimAt(const FVector& WorldLocation) {
 }
 
 void UTankAimingComponent::Fire() {
-    bool isReloaded = (FPlatformTime::Seconds() - LastFiringTimeInSeconds) > TimeToReloadInSeconds;
     UClass* ProjectileClass = Projectile.Get();
     if (!ensure(Barrel && ProjectileClass)) {
         return;
     }
-    if (!isReloaded) {
+    if (FiringState == EFiringState::Reloading) {
         return;
     }
     
@@ -60,7 +70,7 @@ void UTankAimingComponent::Fire() {
 }
 
 void UTankAimingComponent::MoveBarrelTowards(const FVector& AimDirection) {
-    
+    this->AimDirection = AimDirection;
     if (!ensure(Barrel && Turret)) {
         return;
     }
@@ -73,11 +83,39 @@ void UTankAimingComponent::MoveBarrelTowards(const FVector& AimDirection) {
 }
 
 float UTankAimingComponent::GetMinDegreesMovement(const float& Degrees) const {
-    if ((Degrees >= 0 && Degrees <= 180) || (Degrees <= 0 && Degrees >= -180)) {
+    if (FMath::Abs(Degrees) <= 180) {
         return Degrees;
     }
     if (Degrees >= 0) {
         return Degrees - 360;
     }
     return Degrees + 360;
+}
+
+void UTankAimingComponent::SetFiringState() {
+    if (IsReloading()) {
+        FiringState = EFiringState::Reloading;
+    }
+    else if (IsBarrelMoving()) {
+        FiringState = EFiringState::Aiming;
+    }
+    else {
+        FiringState = EFiringState::Locked;
+    }
+}
+
+bool UTankAimingComponent::IsReloading() {
+    return FPlatformTime::Seconds() - LastFiringTimeInSeconds < TimeToReloadInSeconds;
+}
+
+bool UTankAimingComponent::IsBarrelMoving() {
+    if (!ensure(Barrel)) {
+        return true;
+    }
+    return !Barrel->GetForwardVector().Equals(AimDirection, 0.1);
+}
+
+
+EFiringState UTankAimingComponent::GetFiringState() {
+    return FiringState;
 }

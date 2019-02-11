@@ -18,26 +18,25 @@ void ATankPlayerController::Tick(float DeltaTime) {
 }
 
 void ATankPlayerController::AimTowardsCrosshair() {
-    FVector HitLocation;
-    GetSightRayHitLocation(HitLocation);
-}
-
-
-bool ATankPlayerController::GetSightRayHitLocation(FVector& OutHitLocation) const {
+    if (!GetPawn()) {
+        return;
+    }
     auto AimingComponent = GetPawn()->FindComponentByClass<UTankAimingComponent>();
     if (!ensure(AimingComponent)) {
-        return false;
+        return;
     }
-    
+    FVector HitLocation;
+    if (GetSightRayHitLocation(HitLocation)) {
+        AimingComponent->AimAt(HitLocation);
+    }
+}
+
+bool ATankPlayerController::GetSightRayHitLocation(FVector& OutHitLocation) const {
     FVector2D CrosshairScreenPosition = GetCrosshairScreenPosition();
     FVector WorldLocation;
     FVector WorldDirection;
-    if (DeprojectScreenPositionToWorld(CrosshairScreenPosition.X, CrosshairScreenPosition.Y, WorldLocation, WorldDirection)) {
-        GetLookVectorHitLocation(OutHitLocation, WorldDirection);
-        AimingComponent->AimAt(OutHitLocation);
-        return true;
-    }
-    return false;
+    return DeprojectScreenPositionToWorld(CrosshairScreenPosition.X, CrosshairScreenPosition.Y, WorldLocation, WorldDirection)
+            && GetLookVectorHitLocation(OutHitLocation, WorldDirection);
 }
 
 FVector2D ATankPlayerController::GetCrosshairScreenPosition() const {
